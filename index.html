@@ -35,7 +35,7 @@
     </style>
   </head>
   <body>
-    <h1>Random Selections</h1>
+    <h1>Curling Caddy</h1>
 
     <div>
       <div class="tab active" onclick="switchTab('shot-management')">
@@ -52,28 +52,49 @@
       <!-- Strategy Categories will be inserted here by JavaScript -->
     </div>
 
+    <div id="edit-container">
+      <h2>Edit Categories</h2>
+      <select id="category-select">
+        <!-- Option elements will be populated by JavaScript -->
+      </select>
+      <button onclick="enableEditing()">Edit Selected Category</button>
+      <div id="edit-mode" class="edit-mode" style="display: none">
+        <!-- Editing interface will be inserted here by JavaScript -->
+      </div>
+    </div>
+
     <button onclick="randomize()">Randomize</button>
 
     <script>
-      const categories = {
-        "Shot Management": {
-          Position: ["Lead", "Second", "Third", "Fourth"],
-          "Position in doubles": ["First", "Mid", "Last"],
-          Turn: ["CW", "CCW"],
-          "Shot type": ["Hit", "Draw"],
-          Broom: ["12 foot", "8 foot", "4 foot", "Edge button"],
-          Ice: ["Slow", "Heavy"],
-          Rock: ["Slow", "Cutter", "Fast", "Straight"],
-          Tolerance: ["Heavy", "Light"],
-        },
-        Strategy: {
-          end: ["1", "2", "3", "4", "5", "6", "7", "8"],
-          hammer: ["yes", "no"],
-          score: ["up 1", "up 2", "down 1", "down 2", "tied"],
-        },
-      };
+      // Check if categories exist in local storage, if not set default values
+      if (!localStorage.getItem("categories")) {
+        const defaultCategories = {
+          "Shot Management": {
+            Position: ["Lead", "Second", "Third", "Fourth"],
+            "Position in doubles": ["First", "Mid", "Last"],
+            Turn: ["CW", "CCW"],
+            "Shot type": ["Hit", "Draw"],
+            Broom: ["12 foot", "8 foot", "4 foot", "Edge button"],
+            Ice: ["Slow", "Heavy"],
+            Rock: ["Slow", "Cutter", "Fast", "Straight"],
+            Tolerance: ["Heavy", "Light"],
+          },
+          Strategy: {
+            end: ["1", "2", "3", "4", "5", "6", "7", "8"],
+            hammer: ["yes", "no"],
+            score: ["up 1", "up 2", "down 1", "down 2", "tied"],
+          },
+        };
+        localStorage.setItem("categories", JSON.stringify(defaultCategories));
+      }
+
+      function getRandomCategories() {
+        const categories = JSON.parse(localStorage.getItem("categories"));
+        return categories;
+      }
 
       function randomize() {
+        const categories = getRandomCategories();
         for (let categoryKey in categories) {
           const categorySet = categories[categoryKey];
           const categoriesElement = document.getElementById(
