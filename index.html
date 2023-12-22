@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Selections</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+  .tab {
+    cursor: pointer;
+    padding: 10px;
+    margin-right: 5px;
+    background: #eee;
+    display: inline-block;
+    border: 1px solid #ccc;
+  }
+  .tab.active {
+    background-color: #ccc;
+  }
+  .category-list {
+    display: none;
+    list-style-type: none;
+  }
+  .category-list.active {
+    display: block;
+  }
+  .category-item {
+    margin: 10px 0;
+  }
+  button {
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Random Selections</h1>
+
+<div>
+  <div class="tab active" onclick="switchTab('shot-management')">Shot Management</div>
+  <div class="tab" onclick="switchTab('strategy')">Strategy</div>
+</div>
+
+<div id="shot-management" class="category-list active">
+  <!-- Shot Management Categories will be inserted here by JavaScript -->
+</div>
+
+<div id="strategy" class="category-list">
+  <!-- Strategy Categories will be inserted here by JavaScript -->
+</div>
+
+<button onclick="randomize()">Randomize</button>
+
+<script>
+const categories = {
+  "Shot Management": {
+    "Position": ["Lead", "Second", "Third", "Fourth"],
+    "Position in doubles": ["First", "Mid", "Last"],
+    "Turn": ["CW", "CCW"],
+    "Shot type": ["Hit", "Draw"],
+    "Broom": ["12 foot", "8 foot", "4 foot", "Edge button"],
+    "Ice": ["Slow", "Heavy"],
+    "Rock": ["Slow", "Cutter", "Fast", "Straight"],
+    "Tolerance": ["Heavy", "Light"]
+  },
+  "Strategy": {
+    "end": ["1", "2", "3", "4"],
+    "hammer": ["yes", "no"]
+  }
+};
+
+function randomize() {
+  for (let categoryKey in categories) {
+    const categorySet = categories[categoryKey];
+    const categoriesElement = document.getElementById(categoryKey.toLowerCase().replace(/\s+/g, '-'));
+    categoriesElement.innerHTML = ""; // Clear existing categories before randomizing
+    
+    for (let category in categorySet) {
+      const randomIndex = Math.floor(Math.random() * categorySet[category].length);
+      const randomItem = categorySet[category][randomIndex];
+
+      const listItem = document.createElement('div');
+      listItem.className = 'category-item';
+      listItem.innerHTML = `<strong>${category}:</strong> ${randomItem}`;
+      categoriesElement.appendChild(listItem);
+    }
+  }
+}
+
+function switchTab(tabId) {
+  // Update tab styles
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    if (tab.textContent.toLowerCase().replace(/\s+/g, '-') === tabId) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  // Show the correct category list
+  const categoryLists = document.querySelectorAll('.category-list');
+  categoryLists.forEach(list => {
+    if (list.id === tabId) {
+      list.classList.add('active');
+    } else {
+      list.classList.remove('active');
+    }
+  });
+}
+
+// Initialize with randomized selections on page load
+randomize();
+</script>
+
+</body>
+</html>
