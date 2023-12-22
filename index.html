@@ -3,10 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Random Selections</title>
+    <title>Curling Caddy</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
         font-family: Arial, sans-serif;
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        margin: 0;
       }
       .tab {
         cursor: pointer;
@@ -22,12 +29,38 @@
       .category-list {
         display: none;
         list-style-type: none;
+        flex-wrap: wrap;
       }
       .category-list.active {
-        display: block;
+        display: flex;
       }
       .category-item {
-        margin: 10px 0;
+        margin: 10px 10px;
+        width: calc(50% - 20px);
+        background: #eee;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+        padding: 10px;
+        text-align: center;
+      }
+      .category-title {
+        font-weight: 100;
+        opacity: 0.7;
+      }
+      .category-text {
+        font-size: 1.2em;
+      }
+      .randomize-button {
+        margin: 20px 0;
+        padding: 10px;
+        background: #eee;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        width: 200px;
+        height: 60px;
+        font-size: 20px;
+        text-transform: uppercase;
+        background: darkblue;
+        color: white;
       }
       button {
         margin: 20px 0;
@@ -35,6 +68,53 @@
       #edit-mode {
         align-items: center;
         justify-content: start;
+        display: flex;
+        flex-flow: column;
+        margin-top: 20px;
+      }
+      #edit-container {
+        display: flex;
+        flex-flow: column;
+        background: #ddd;
+        padding: 0 20px 40px;
+      }
+      .select-container {
+        display: flex;
+        align-items: center;
+      }
+      select {
+        margin: 10px 0;
+        padding: 10px;
+        background: #eee;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        width: 50%;
+        height: 40px;
+        font-size: 18px;
+        text-transform: uppercase;
+        margin: 0 10px 0 0;
+      }
+      select:last-child {
+        margin: 0;
+      }
+      input {
+        margin: 10px 0;
+        padding: 10px;
+        background: #eee;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        width: 100%;
+        height: 40px;
+        font-size: 18px;
+      }
+      .button-container {
+        display: flex;
+      }
+      .button-container button {
+        margin: 0 10px;
+        padding: 10px;
+        background: #eee;
+        border: 1px solid #ccc;
       }
     </style>
   </head>
@@ -56,29 +136,36 @@
       <!-- Strategy Categories will be inserted here by JavaScript -->
     </div>
 
-    <button onclick="randomize()">Randomize</button>
+    <button class="randomize-button" onclick="randomize()">Randomize</button>
 
     <div id="edit-container">
       <h2>Edit Categories</h2>
-      <select id="category-select" onchange="selectCategory()">
-        <!-- Option elements will be populated by JavaScript -->
-      </select>
-      <select id="value-select" style="display: none" onchange="selectValue()">
-        <!-- Value selectors will be populated after category is selected -->
-      </select>
+      <div class="select-container">
+        <select id="category-select" onchange="selectCategory()">
+          <!-- Option elements will be populated by JavaScript -->
+        </select>
+        <select
+          id="value-select"
+          style="display: none"
+          onchange="selectValue()"
+        >
+          <!-- Value selectors will be populated after category is selected -->
+        </select>
+      </div>
       <div id="edit-mode" class="edit-mode" style="display: none">
         <input
           type="text"
           id="category-value"
           placeholder="Add or edit a value"
         />
-        <button onclick="saveCategory()" id="save-category-button">Save</button>
-        <button onclick="deleteCategory()" id="delete-category-button">
-          Delete
-        </button>
-        <button onclick="cancelEditing()" id="cancel-editing-button">
-          Cancel
-        </button>
+        <div class="button-container">
+          <button onclick="saveCategory()" id="save-category-button">Save</button>
+          <button onclick="deleteCategory()" id="delete-category-button">
+            Delete
+          </button>
+          <button onclick="cancelEditing()" id="cancel-editing-button">
+            Cancel
+          </button>
       </div>
     </div>
 
@@ -145,7 +232,7 @@
 
             const listItem = document.createElement("div");
             listItem.className = "category-item";
-            listItem.innerHTML = `<strong>${category}:</strong> ${randomItem}`;
+            listItem.innerHTML = `<div class='category-title'>${category}:</div><div class='category-text'>${randomItem}</div>`;
             categoriesElement.appendChild(listItem);
           }
         }
@@ -245,7 +332,6 @@
         editingCategory = null;
         editingValueIndex = null;
         document.getElementById("category-value").value = "";
-        document.getElementById("edit-mode").style.display = "none";
       }
 
       function selectCategory() {
