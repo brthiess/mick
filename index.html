@@ -52,40 +52,68 @@
       <!-- Strategy Categories will be inserted here by JavaScript -->
     </div>
 
+    <button onclick="randomize()">Randomize</button>
+
     <div id="edit-container">
       <h2>Edit Categories</h2>
-      <select id="category-select">
+      <select id="category-select" onchange="selectCategory()">
         <!-- Option elements will be populated by JavaScript -->
+      </select>
+      <select id="value-select" style="display: none" onchange="selectValue()">
+        <!-- Value selectors will be populated after category is selected -->
       </select>
       <button onclick="enableEditing()">Edit Selected Category</button>
       <div id="edit-mode" class="edit-mode" style="display: none">
-        <!-- Editing interface will be inserted here by JavaScript -->
+        <input
+          type="text"
+          id="category-value"
+          placeholder="Add or edit a value"
+        />
+        <button onclick="saveCategory()">Save</button>
+        <button onclick="deleteCategory()">Delete</button>
+        <button onclick="cancelEditing()">Cancel</button>
       </div>
     </div>
 
-    <button onclick="randomize()">Randomize</button>
-
     <script>
-      // Check if categories exist in local storage, if not set default values
-      if (!localStorage.getItem("categories")) {
-        const defaultCategories = {
-          "Shot Management": {
-            Position: ["Lead", "Second", "Third", "Fourth"],
-            "Position in doubles": ["First", "Mid", "Last"],
-            Turn: ["CW", "CCW"],
-            "Shot type": ["Hit", "Draw"],
-            Broom: ["12 foot", "8 foot", "4 foot", "Edge button"],
-            Ice: ["Slow", "Heavy"],
-            Rock: ["Slow", "Cutter", "Fast", "Straight"],
-            Tolerance: ["Heavy", "Light"],
-          },
-          Strategy: {
-            end: ["1", "2", "3", "4", "5", "6", "7", "8"],
-            hammer: ["yes", "no"],
-            score: ["up 1", "up 2", "down 1", "down 2", "tied"],
-          },
-        };
-        localStorage.setItem("categories", JSON.stringify(defaultCategories));
+      let editingCategory = null;
+      let editingValueIndex = null;
+
+      // On page load, check for existing categories or initialize it
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!localStorage.getItem("categories")) {
+          setDefaultCategories();
+        }
+        populateCategorySelect();
+        randomize();
+      });
+
+      function setDefaultCategories() {
+        // Check if categories exist in local storage, if not set default values
+        if (!localStorage.getItem("categories")) {
+          const defaultCategories = {
+            "Shot Management": {
+              Position: ["Lead", "Second", "Third", "Fourth"],
+              "Position in doubles": ["First", "Mid", "Last"],
+              Turn: ["CW", "CCW"],
+              "Shot type": ["Hit", "Draw"],
+              Broom: ["12 foot", "8 foot", "4 foot", "Edge button"],
+              Ice: ["Slow", "Heavy"],
+              Rock: ["Slow", "Cutter", "Fast", "Straight"],
+              Tolerance: ["Heavy", "Light"],
+            },
+            Strategy: {
+              end: ["1", "2", "3", "4", "5", "6", "7", "8"],
+              hammer: ["yes", "no"],
+              score: ["up 1", "up 2", "down 1", "down 2", "tied"],
+            },
+          };
+          localStorage.setItem("categories", JSON.stringify(defaultCategories));
+        }
+      }
+
+      function getCategories() {
+        return JSON.parse(localStorage.getItem("categories"));
       }
 
       function getRandomCategories() {
@@ -138,8 +166,125 @@
         });
       }
 
-      // Initialize with randomized selections on page load
-      randomize();
+      function populateCategorySelect() {
+        // Clear existing options
+        const categorySelect = document.getElementById("category-select");
+        categorySelect.innerHTML = "";
+
+        // Populate category select with options
+        const categories = getCategories();
+        Object.keys(categories).forEach((categoryGroup) => {
+          const optgroup = document.createElement("optgroup");
+          optgroup.label = categoryGroup;
+
+          Object.keys(categories[categoryGroup]).forEach((category) => {
+            const option = document.createElement("option");
+            option.value = `${categoryGroup}:${category}`;
+            option.textContent = category;
+            optgroup.appendChild(option);
+          });
+
+          categorySelect.appendChild(optgroup);
+        });
+      }
+
+      function enableEditing() {
+        const categorySelect = document.getElementById("category-select");
+        const selectedValue = categorySelect.value;
+        if (selectedValue) {
+          const [categoryGroup, category] = selectedValue.split(":");
+          editingCategory = { categoryGroup, category };
+          document.getElementById("edit-mode").style.display = "block";
+        }
+      }
+
+      function saveCategory() {
+        const newValue = document.getElementById("category-value").value;
+        const categories = getCategories();
+        if (editingCategory && newValue) {
+          if (editingValueIndex !== null) {
+            categories[editingCategory.categoryGroup][editingCategory.category][
+              editingValueIndex
+            ] = newValue;
+          } else {
+            categories[editingCategory.categoryGroup][
+              editingCategory.category
+            ].push(newValue);
+          }
+          localStorage.setItem("categories", JSON.stringify(categories));
+          populateCategorySelect();
+          resetEditing();
+        }
+      }
+
+      function deleteCategory() {
+        const categories = getCategories();
+        if (editingCategory && editingValueIndex !== null) {
+          categories[editingCategory.categoryGroup][
+            editingCategory.category
+          ].splice(editingValueIndex, 1);
+          localStorage.setItem("categories", JSON.stringify(categories));
+          populateCategorySelect();
+          resetEditing();
+        }
+      }
+
+      function cancelEditing() {
+        resetEditing();
+      }
+
+      function resetEditing() {
+        editingCategory = null;
+        editingValueIndex = null;
+        document.getElementById("category-value").value = "";
+        document.getElementById("edit-mode").style.display = "none";
+      }
+
+      function selectCategory() {
+        const categorySelect = document.getElementById("category-select");
+        const selectedValue = categorySelect.value;
+        const valueSelect = document.getElementById("value-select");
+        valueSelect.innerHTML = ""; // Clear previous values
+
+        if (selectedValue) {
+          const [categoryGroup, category] = selectedValue.split(":");
+          editingCategory = { categoryGroup, category };
+
+          // Get the values for the selected category
+          const categories = getCategories();
+          const values = categories[categoryGroup][category];
+
+          // Populate the second dropdown with these values
+          values.forEach((value, index) => {
+            const option = document.createElement("option");
+            option.value = index; // The index will be used to identify the value for editing
+            option.textContent = value;
+            valueSelect.appendChild(option);
+          });
+
+          // Show the value select dropdown
+          valueSelect.style.display = "block";
+        } else {
+          // Hide the value select dropdown if no category is selected
+          valueSelect.style.display = "none";
+        }
+
+        editingValueIndex = null;
+        document.getElementById("edit-mode").style.display = "none";
+      }
+
+      function selectValue() {
+        const valueSelect = document.getElementById("value-select");
+        editingValueIndex = valueSelect.value;
+
+        const categories = getCategories();
+        const value =
+          categories[editingCategory.categoryGroup][editingCategory.category][
+            editingValueIndex
+          ];
+        document.getElementById("category-value").value = value;
+        document.getElementById("edit-mode").style.display = "block";
+      }
     </script>
   </body>
 </html>
