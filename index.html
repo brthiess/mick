@@ -32,6 +32,10 @@
       button {
         margin: 20px 0;
       }
+      #edit-mode {
+        align-items: center;
+        justify-content: start;
+      }
     </style>
   </head>
   <body>
@@ -68,9 +72,13 @@
           id="category-value"
           placeholder="Add or edit a value"
         />
-        <button onclick="saveCategory()">Save</button>
-        <button onclick="deleteCategory()">Delete</button>
-        <button onclick="cancelEditing()">Cancel</button>
+        <button onclick="saveCategory()" id="save-category-button">Save</button>
+        <button onclick="deleteCategory()" id="delete-category-button">
+          Delete
+        </button>
+        <button onclick="cancelEditing()" id="cancel-editing-button">
+          Cancel
+        </button>
       </div>
     </div>
 
@@ -185,6 +193,7 @@
 
           categorySelect.appendChild(optgroup);
         });
+        selectCategory();
       }
 
       function enableEditing() {
@@ -285,6 +294,11 @@
           document.getElementById("category-value").value = "";
           document.getElementById("category-value").placeholder =
             "Add new value";
+          //hide delete button
+          document.getElementById("delete-category-button").style.display =
+            "none";
+          //show save button and rename to Add
+          document.getElementById("save-category-button").textContent = "Add";
         } else {
           const categories = getCategories();
           const value =
@@ -293,8 +307,13 @@
             ];
           document.getElementById("category-value").value = value;
           document.getElementById("category-value").placeholder = "Edit value";
+          //show delete button
+          document.getElementById("delete-category-button").style.display =
+            "block";
+          //show save button and rename to Save
+          document.getElementById("save-category-button").textContent = "Save";
         }
-        document.getElementById("edit-mode").style.display = "block";
+        document.getElementById("edit-mode").style.display = "flex";
       }
     </script>
   </body>
