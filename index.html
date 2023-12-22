@@ -62,7 +62,6 @@
       <select id="value-select" style="display: none" onchange="selectValue()">
         <!-- Value selectors will be populated after category is selected -->
       </select>
-      <button onclick="enableEditing()">Edit Selected Category</button>
       <div id="edit-mode" class="edit-mode" style="display: none">
         <input
           type="text"
@@ -262,6 +261,11 @@
             valueSelect.appendChild(option);
           });
 
+          const option = document.createElement("option");
+          option.value = -1; // The index will be used to identify the value for editing
+          option.textContent = "+ Add new";
+          valueSelect.appendChild(option);
+
           // Show the value select dropdown
           valueSelect.style.display = "block";
         } else {
@@ -269,20 +273,27 @@
           valueSelect.style.display = "none";
         }
 
-        editingValueIndex = null;
-        document.getElementById("edit-mode").style.display = "none";
+        selectValue();
       }
 
       function selectValue() {
         const valueSelect = document.getElementById("value-select");
         editingValueIndex = valueSelect.value;
 
-        const categories = getCategories();
-        const value =
-          categories[editingCategory.categoryGroup][editingCategory.category][
-            editingValueIndex
-          ];
-        document.getElementById("category-value").value = value;
+        if (editingValueIndex === "-1") {
+          editingValueIndex = null;
+          document.getElementById("category-value").value = "";
+          document.getElementById("category-value").placeholder =
+            "Add new value";
+        } else {
+          const categories = getCategories();
+          const value =
+            categories[editingCategory.categoryGroup][editingCategory.category][
+              editingValueIndex
+            ];
+          document.getElementById("category-value").value = value;
+          document.getElementById("category-value").placeholder = "Edit value";
+        }
         document.getElementById("edit-mode").style.display = "block";
       }
     </script>
